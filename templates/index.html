@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mushroom Classification</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f8f0;
+      text-align: center;
+      padding: 30px;
+    }
+
+    h1 {
+      color: #2d6a2d;
+      font-size: 28px;
+    }
+
+    p.subtitle {
+      color: #555;
+      font-size: 15px;
+    }
+
+    /* Stat Boxes */
+    .boxes {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 25px 0;
+      flex-wrap: wrap;
+    }
+
+    .box {
+      background: white;
+      border: 2px solid #2d6a2d;
+      border-radius: 10px;
+      padding: 18px 28px;
+      width: 140px;
+    }
+
+    .box h2 {
+      color: #2d6a2d;
+      font-size: 28px;
+      margin: 0;
+    }
+
+    .box p {
+      margin: 5px 0 0;
+      font-size: 13px;
+      color: #777;
+    }
+
+    /* Form */
+    .form-box {
+      background: white;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      padding: 30px;
+      max-width: 420px;
+      margin: 0 auto 25px;
+      text-align: left;
+    }
+
+    .form-box h2 {
+      text-align: center;
+      color: #2d6a2d;
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      margin-top: 14px;
+      font-weight: bold;
+      color: #333;
+      font-size: 14px;
+    }
+
+    select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    button {
+      margin-top: 22px;
+      width: 100%;
+      padding: 12px;
+      background-color: #2d6a2d;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1e4d1e;
+    }
+
+    /* Result Box */
+    .result-edible {
+      background-color: #d4edda;
+      border: 2px solid #28a745;
+      color: #155724;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 420px;
+      margin: 0 auto 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .result-poisonous {
+      background-color: #f8d7da;
+      border: 2px solid #dc3545;
+      color: #721c24;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 420px;
+      margin: 0 auto 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .result-edible p,
+    .result-poisonous p {
+      font-size: 14px;
+      font-weight: normal;
+      margin: 8px 0 0;
+    }
+
+    /* Warning */
+    .warning {
+      font-size: 12px;
+      color: #999;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    /* Pipeline steps */
+    .pipeline {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin: 25px 0;
+      flex-wrap: wrap;
+    }
+
+    .step {
+      background: white;
+      border: 1px solid #2d6a2d;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      color: #2d6a2d;
+    }
+
+    .arrow {
+      font-size: 18px;
+      color: #2d6a2d;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🍄 Mushroom Classification System</h1>
+  <p class="subtitle">
+    Predict if a mushroom is <b>Edible</b> or <b>Poisonous</b>
+    using <b>Random Forest</b> Machine Learning Model
+  </p>
+
+  <!-- Stat Boxes -->
+  <div class="boxes">
+    <div class="box">
+      <h2>8124</h2>
+      <p>Total Records</p>
+    </div>
+    <div class="box">
+      <h2>22</h2>
+      <p>Features</p>
+    </div>
+    <div class="box">
+      <h2>94%</h2>
+      <p>RF Accuracy</p>
+    </div>
+    <div class="box">
+      <h2>91%</h2>
+      <p>DT Accuracy</p>
+    </div>
+  </div>
+
+  <!-- ML Pipeline -->
+  <div class="pipeline">
+    <div class="step">📁 Dataset</div>
+    <div class="arrow">→</div>
+    <div class="step">🔢 Encoding</div>
+    <div class="arrow">→</div>
+    <div class="step">✂️ Train/Test Split</div>
+    <div class="arrow">→</div>
+    <div class="step">🧠 Random Forest</div>
+    <div class="arrow">→</div>
+    <div class="step">🔮 Prediction</div>
+  </div>
+
+  <!-- Show Result if prediction was made -->
+  {% if prediction == "EDIBLE" %}
+  <div class="result-edible">
+    ✅ Prediction: EDIBLE
+    <p>{{ message }}</p>
+    <p>Confidence: {{ confidence }}%</p>
+  </div>
+  {% elif prediction == "POISONOUS" %}
+  <div class="result-poisonous">
+    ☠️ Prediction: POISONOUS
+    <p>{{ message }}</p>
+    <p>Confidence: {{ confidence }}%</p>
+  </div>
+  {% endif %}
+
+  <!-- Prediction Form -->
+  <!-- method="POST" sends data to Flask /predict route -->
+  <div class="form-box">
+    <h2>🔍 Enter Mushroom Features</h2>
+
+    <form method="POST" action="/predict">
+
+      <label>Cap Shape</label>
+      <select name="cap_shape">
+        <option value="x">Convex</option>
+        <option value="b">Bell</option>
+        <option value="f">Flat</option>
+        <option value="k">Knobbed</option>
+        <option value="s">Sunken</option>
+        <option value="c">Conical</option>
+      </select>
+
+      <label>Cap Color</label>
+      <select name="cap_color">
+        <option value="n">Brown</option>
+        <option value="y">Yellow</option>
+        <option value="w">White</option>
+        <option value="g">Gray</option>
+        <option value="e">Red</option>
+        <option value="p">Pink</option>
+        <option value="b">Buff</option>
+        <option value="u">Purple</option>
+        <option value="c">Cinnamon</option>
+      </select>
+
+      <label>Odor</label>
+      <select name="odor">
+        <option value="n">None</option>
+        <option value="a">Almond</option>
+        <option value="l">Anise</option>
+        <option value="f">Foul ☠️</option>
+        <option value="p">Pungent ☠️</option>
+        <option value="s">Spicy</option>
+        <option value="y">Fishy</option>
+        <option value="m">Musty</option>
+        <option value="c">Creosote</option>
+      </select>
+
+      <label>Gill Color</label>
+      <select name="gill_color">
+        <option value="k">Black</option>
+        <option value="n">Brown</option>
+        <option value="w">White</option>
+        <option value="b">Buff</option>
+        <option value="p">Pink</option>
+        <option value="g">Gray</option>
+        <option value="y">Yellow</option>
+        <option value="r">Red</option>
+      </select>
+
+      <label>Habitat</label>
+      <select name="habitat">
+        <option value="d">Woods</option>
+        <option value="g">Grasses</option>
+        <option value="l">Leaves</option>
+        <option value="m">Meadows</option>
+        <option value="p">Paths</option>
+        <option value="u">Urban</option>
+        <option value="w">Waste</option>
+      </select>
+
+      <label>Bruises?</label>
+      <select name="bruises">
+        <option value="t">Yes</option>
+        <option value="f">No</option>
+      </select>
+
+      <label>Population</label>
+      <select name="population">
+        <option value="s">Scattered</option>
+        <option value="n">Numerous</option>
+        <option value="a">Abundant</option>
+        <option value="v">Several</option>
+        <option value="y">Solitary</option>
+        <option value="c">Clustered</option>
+      </select>
+
+      <label>Spore Print Color</label>
+      <select name="spore_color">
+        <option value="k">Black</option>
+        <option value="n">Brown</option>
+        <option value="u">Purple</option>
+        <option value="h">Chocolate</option>
+        <option value="w">White</option>
+        <option value="r">Green</option>
+        <option value="o">Orange</option>
+        <option value="y">Yellow</option>
+        <option value="b">Buff</option>
+      </select>
+
+      <button type="submit">✅ Predict Mushroom</button>
+
+    </form>
+  </div>
+</body>
+</html>
